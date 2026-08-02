@@ -1,3 +1,9 @@
+document.body.classList.add('no-scroll');
+window.addEventListener("beforeunload", () => {
+  window.scrollTo(0, 0);
+});
+gsap.registerPlugin(ScrollTrigger);
+
 document.addEventListener("DOMContentLoaded", () => {
   // Intersection Observer لظهور العناصر عند السكرول
   const reveals = document.querySelectorAll(".reveal");
@@ -10,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }, observerOptions);
-
+  
   reveals.forEach((el) => revealObserver.observe(el));
 
   // العداد التنازلي
@@ -57,10 +63,11 @@ function openInvitation() {
   const mainSite = document.getElementById("main-site");
   const audio = document.getElementById("bgMusic");
   const musicToggle = document.getElementById("musicToggle");
+  document.body.classList.remove('no-scroll');
 
   // 1. إضافة كلاس الفتح للظرف والموقع
   envelopeScreen.classList.add("opened");
-  
+
   // 2. تأخير بسيط في ظهور الموقع ليعطي إحساس خروج الكارت ببطء ونعومة
   setTimeout(() => {
     mainSite.classList.add("active");
@@ -103,3 +110,121 @@ function createPetals() {
     container.appendChild(petal);
   }
 }
+
+const RSVP_API =
+  "https://script.google.com/macros/s/AKfycbz4QCkbpVDpDyWhy58QFT3smepKIu-2ovcD2eCN6IkzGTKGHNharwIEGdvOchPF8AS0FA/exec";
+const invitationId =
+  new URLSearchParams(window.location.search).get("id") || "OmarMariamEngagement2026";
+
+const form = document.getElementById("rsvpForm");
+
+form.addEventListener("submit", async (e) => {
+  debugger
+  e.preventDefault();
+
+  document.querySelectorAll(".err").forEach(err => err.textContent = "");
+
+  const fullName = document.getElementById("guestName").value.trim();
+  const guests = document.getElementById("guestCount").value;
+  const song = document.getElementById("songRequest").value.trim();
+
+  if (fullName.length < 2) {
+
+    document.querySelector('[data-for="guestName"]').textContent =
+      "Please enter your full name.";
+
+    return;
+  }
+
+  const submitButton = document.getElementById("submitBtn");
+
+  submitButton.disabled = true;
+  submitButton.innerHTML = "Sending...";
+
+  try {
+
+    await fetch(RSVP_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      mode: "no-cors",
+      body: JSON.stringify({
+        invitationId,
+        name: fullName,
+        guests,
+        message: song
+      })
+    });
+
+    form.reset();
+
+    document.getElementById("formSuccess").style.display = "block";
+
+    submitButton.style.display = "none";
+
+  } catch (error) {
+
+    console.error(error);
+
+    submitButton.disabled = false;
+    submitButton.innerHTML = "Send RSVP Confirmation ✨";
+
+    alert("Something went wrong.");
+  }
+
+});
+gsap.utils.toArray(".timeline-item").forEach((item) => {
+
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: item,
+      start: "top 82%",
+      toggleActions: "play none none none"
+    }
+  });
+
+  tl.from(item.querySelector(".timeline-dot"), {
+    scale: 0,
+    duration: 0.3,
+    ease: "back.out(2)"
+  })
+
+    .from(item.querySelector(".timeline-time"), {
+      x: -40,
+      opacity: 0,
+      duration: 0.4
+    }, "-=0.15")
+
+    .from(item.querySelector(".timeline-title"), {
+      y: 20,
+      opacity: 0,
+      duration: 0.4
+    }, "-=0.2")
+
+    .from(item.querySelector("p"), {
+      y: 20,
+      opacity: 0,
+      duration: 0.4
+    }, "-=0.25");
+
+});
+
+gsap.utils.toArray("section").forEach((section) => {
+
+  gsap.from(section, {
+
+    y: 80,
+    opacity: 0,
+    duration: 1.2,
+    ease: "power3.out",
+
+    scrollTrigger: {
+      trigger: section,
+      start: "top 82%",
+      toggleActions: "play none none none"
+    }
+
+  });
+
+});
