@@ -1,7 +1,9 @@
-document.body.classList.add('no-scroll');
-window.addEventListener("beforeunload", () => {
-  window.scrollTo(0, 0);
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+  }, 50);
 });
+document.body.classList.add('no-scroll');
 gsap.registerPlugin(ScrollTrigger);
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -16,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }, observerOptions);
-  
+
   reveals.forEach((el) => revealObserver.observe(el));
 
   // العداد التنازلي
